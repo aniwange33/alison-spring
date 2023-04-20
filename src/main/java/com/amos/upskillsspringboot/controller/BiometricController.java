@@ -18,19 +18,21 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("biometric/status")
-public class UpdateBiometricStatus {
+public class BiometricController {
 	
 	@PostMapping("/update")
-	public ResponseEntity<String> updateBiometricStatus(@RequestParam("facilityId") Long facility, @RequestParam("file") MultipartFile file){
-		try {
-			File file1 = file.getResource().getFile();
-			FileReader filereader = new FileReader(file1);
-			CSVReader csvReader = new CSVReader(filereader);
+	public static ResponseEntity<String> updateBiometricStatus(@RequestParam("facilityId") Long facility, @RequestParam("file") MultipartFile file){
+		processBiometricDataCSV(file);
+		return new ResponseEntity<>("Success", HttpStatus.ACCEPTED);
+	}
+	
+	private static void processBiometricDataCSV(MultipartFile file) {
+		try (FileReader filereader = new FileReader(file.getResource().getFile());
+		     CSVReader csvReader = new CSVReader(filereader)) {
 			List<String[]> data = csvReader.readAll();
 			log.debug("data {}", data);
 		} catch (IOException | CsvException e) {
 			throw new RuntimeException(e);
 		}
-		return new ResponseEntity<>("Success", HttpStatus.ACCEPTED);
 	}
 }
